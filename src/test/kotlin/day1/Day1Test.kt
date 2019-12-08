@@ -11,8 +11,8 @@ class Day1Test {
     @CsvSource(
         "12,2",
         "14,2",
-        "1969,654",
-        "100756,33583"
+        "1969,966",
+        "100756,50346"
     )
     fun `should calculate fuel`(mass: Int, requiredFuel: Int) {
         assertThat(calculateFuel(mass)).isEqualTo(requiredFuel)
@@ -24,9 +24,6 @@ class Day1Test {
         assertThat(totalFuelRequired(moduleMasses1)).isEqualTo(4)
 
         val moduleMasses2 = listOf(12, 14, 1969)
-        assertThat(totalFuelRequired(moduleMasses2)).isEqualTo(658)
+        assertThat(totalFuelRequired(moduleMasses2)).isEqualTo(970)
     }
-
-
-
 }
