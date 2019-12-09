@@ -7,4 +7,8 @@ object FileReader {
     fun readFile(fileName: String) = this::class.java.getResourceAsStream(fileName)
         .bufferedReader()
         .readLine()
+
+    fun readLines(fileName: String) = this::class.java.getResourceAsStream(fileName)
+        .bufferedReader()
+        .readLines()
 }

@@ -1,7 +1,7 @@
 .gradle
 build
 dist
-*/out
+/out
 
 *.iml
 *.ipr
