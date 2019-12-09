@@ -20,38 +20,43 @@ fun main() {
     println("    ...completed in $fewestStepsTime ms")
 }
 
-
 fun closestIntersectionDistance(wire1: String, wire2: String): Int {
-    val wire1Coordinates = wireToCoordinates(wire1)
-    val wire2Coordinates = wireToCoordinates(wire2)
+    val intersectingCoordinates = findIntersectingCoordinates(wire1, wire2)
 
-    val minDistanceCoordinate = wire1Coordinates
-        .filter { wire1Coord ->
-            wire2Coordinates.any { wire1Coord.samePositionAs(it) }
-        }
+    return intersectingCoordinates
         .minBy { it.distance() }
+        ?.distance()
         ?: throw IllegalStateException("No intersection found")
-
-    return minDistanceCoordinate.distance()
 }
 
 fun fewestStepsToIntersection(wire1: String, wire2: String): Int {
-    val wire1Coordinates = wireToCoordinates(wire1)
-    val wire2Coordinates = wireToCoordinates(wire2)
+    val intersectingCoordinates = findIntersectingCoordinates(wire1, wire2)
 
-    return wire1Coordinates
-        .flatMap { wire1Coord ->
-            wire2Coordinates
-                .withSamePositionAs(wire1Coord)
-                .map { wire2Coord -> wire2Coord.numberOfSteps + wire1Coord.numberOfSteps }
+    val wire1Intersections = wireToCoordinates(wire1).filterValues { it in intersectingCoordinates }
+    val wire2Intersections = wireToCoordinates(wire2).filterValues { it in intersectingCoordinates }
+
+    return wire1Intersections
+        .flatMap { (wire1steps, wire1coord) ->
+            wire2Intersections
+                .filterValues { it == wire1coord }
+                .map { (wire2steps, _) -> wire1steps + wire2steps  }
         }
         .min()
         ?: throw IllegalStateException("No intersection found")
 }
 
-fun wireToCoordinates(wire: String): List<Coordinate> {
-    var currentCoordinate = Coordinate(0, 0, 0)
-    val wireCoordinates = mutableListOf<Coordinate>()
+private fun findIntersectingCoordinates(wire1: String, wire2: String): Set<Coordinate> {
+    val wire1Coordinates = wireToCoordinates(wire1).values.toList()
+    val wire2Coordinates = wireToCoordinates(wire2).values.toList()
+    return wire1Coordinates.intersect(wire2Coordinates)
+}
+
+typealias NumberOfSteps = Int
+
+fun wireToCoordinates(wire: String): Map<NumberOfSteps, Coordinate> {
+    var currentCoordinate = Coordinate(0, 0)
+    var numberOfSteps = 0
+    val wireCoordinates = mutableMapOf<NumberOfSteps, Coordinate>()
 
     wire.split(",")
         .map { s ->
@@ -60,36 +65,35 @@ fun wireToCoordinates(wire: String): List<Coordinate> {
             when (instruction.direction) {
                 Direction.R -> {
                     (1..instruction.numberOfMoves).forEach { moveBy ->
-                        wireCoordinates.add(currentCoordinate.moveX(moveBy))
+                        wireCoordinates[++numberOfSteps] = currentCoordinate.moveX(moveBy)
                     }
                 }
                 Direction.U -> {
                     (1..instruction.numberOfMoves).forEach { moveBy ->
-                        wireCoordinates.add(currentCoordinate.moveY(moveBy))
+                        wireCoordinates[++numberOfSteps] = currentCoordinate.moveY(moveBy)
                     }
                 }
                 Direction.D -> {
                     (1..instruction.numberOfMoves).forEach { moveBy ->
-                        wireCoordinates.add(currentCoordinate.moveY(moveBy.negate()))
+                        wireCoordinates[++numberOfSteps] = currentCoordinate.moveY(moveBy.negate())
                     }
                 }
                 Direction.L -> {
                     (1..instruction.numberOfMoves).forEach { moveBy ->
-                        wireCoordinates.add(currentCoordinate.moveX(moveBy.negate()))
+                        wireCoordinates[++numberOfSteps] = currentCoordinate.moveX(moveBy.negate())
                     }
                 }
             }
-            currentCoordinate = wireCoordinates.last()
+            currentCoordinate = wireCoordinates[numberOfSteps]!!
         }
 
     return wireCoordinates
 }
 
-data class Coordinate(val x: Int, val y: Int, val numberOfSteps: Int) {
-    fun moveX(number: Int) = this.copy(x = x + number, numberOfSteps = numberOfSteps + number.absoluteValue)
-    fun moveY(number: Int) = this.copy(y = y + number, numberOfSteps = numberOfSteps + number.absoluteValue)
+data class Coordinate(val x: Int, val y: Int) {
+    fun moveX(number: Int) = this.copy(x = x + number)
+    fun moveY(number: Int) = this.copy(y = y + number)
     fun distance() = x.absoluteValue + y.absoluteValue
-    fun samePositionAs(otherCoordinate: Coordinate) = x == otherCoordinate.x && y == otherCoordinate.y
 }
 
 data class Instruction(val direction: Direction, val numberOfMoves: Int)
@@ -99,5 +103,3 @@ enum class Direction {
 }
 
 private fun Int.negate() = this * -1
-
-fun List<Coordinate>.withSamePositionAs(coordinate: Coordinate) = this.filter { it.samePositionAs(coordinate) }
