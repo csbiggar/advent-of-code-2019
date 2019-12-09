@@ -2,20 +2,20 @@ package day4
 
 fun main() {
     val result = (240298..784956)
-        .filter { meetsCriteria(it.toString()) }
+        .filter { meetsCriteria(it) }
         .count()
 
     println(result)
 }
 
-fun meetsCriteria(number: String, min: String = "240298", max: String = "784956"): Boolean {
+fun meetsCriteria(number: Int, min: Int = 240298, max: Int = 784956): Boolean {
     return containsDouble(number)
             && isAscending(number)
             && number in min..max
 }
 
-private fun isAscending(number: String): Boolean {
-    val digits = number.toList().map { it.toInt() }
+private fun isAscending(number: Int): Boolean {
+    val digits = number.toString().toList().map { it.toInt() }
     val lastIndex = digits.size - 1
 
     (1..lastIndex).forEach { index ->
@@ -24,8 +24,9 @@ private fun isAscending(number: String): Boolean {
     return true
 }
 
-private fun containsDouble(number: String): Boolean {
+private fun containsDouble(number: Int): Boolean {
     return number
+        .toString()
         .windowed(2, 1)
         .filter { it.length == 2 }
         .any { neighbours -> neighbours[0] == neighbours[1] }
