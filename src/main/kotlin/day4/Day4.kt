@@ -4,14 +4,13 @@ fun main() {
     val result = (240298..784956)
         .filter { meetsCriteria(it) }
         .count()
-    
+
     println(result)
 }
 
-fun meetsCriteria(number: Int, min: Int = 240298, max: Int = 784956): Boolean {
+fun meetsCriteria(number: Int): Boolean {
     return containsExactDouble(number)
             && isAscending(number)
-            && number in min..max
 }
 
 private fun isAscending(number: Int): Boolean {
