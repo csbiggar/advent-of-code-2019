@@ -11,6 +11,7 @@ internal class Day3Test {
         val wire2 = "U7,R6,D4,L4"
 
         assertThat(closestIntersectionDistance(wire1, wire2)).isEqualTo(6)
+        assertThat(fewestStepsToIntersection(wire1, wire2)).isEqualTo(30)
     }
 
     @Test
@@ -19,6 +20,7 @@ internal class Day3Test {
         val wire2 = "U62,R66,U55,R34,D71,R55,D58,R83"
 
         assertThat(closestIntersectionDistance(wire1, wire2)).isEqualTo(159)
+        assertThat(fewestStepsToIntersection(wire1, wire2)).isEqualTo(610)
     }
 
     @Test
@@ -27,47 +29,48 @@ internal class Day3Test {
         val wire2 = "U98,R91,D20,R16,D67,R40,U7,R15,U6,R7"
 
         assertThat(closestIntersectionDistance(wire1, wire2)).isEqualTo(135)
+        assertThat(fewestStepsToIntersection(wire1, wire2)).isEqualTo(410)
     }
 
     @Test
     fun `should convert wire route into coordinates`() {
         assertThat(wireToCoordinates("R2")).isEqualTo(
             listOf(
-                Coordinate(1, 0),
-                Coordinate(2, 0)
+                Coordinate(1, 0, 1),
+                Coordinate(2, 0, 2)
             )
         )
 
         assertThat(wireToCoordinates("U2")).isEqualTo(
             listOf(
-                Coordinate(0, 1),
-                Coordinate(0, 2)
+                Coordinate(0, 1, 1),
+                Coordinate(0, 2, 2)
             )
         )
 
         assertThat(wireToCoordinates("D2")).isEqualTo(
             listOf(
-                Coordinate(0, -1),
-                Coordinate(0, -2)
+                Coordinate(0, -1, 1),
+                Coordinate(0, -2, 2)
             )
         )
 
         assertThat(wireToCoordinates("L2")).isEqualTo(
             listOf(
-                Coordinate(-1, 0),
-                Coordinate(-2, 0)
+                Coordinate(-1, 0, 1),
+                Coordinate(-2, 0, 2)
             )
         )
 
         assertThat(wireToCoordinates("R2,U1,L4")).isEqualTo(
             listOf(
-                Coordinate(1, 0),
-                Coordinate(2, 0),
-                Coordinate(2, 1),
-                Coordinate(1, 1),
-                Coordinate(0, 1),
-                Coordinate(-1, 1),
-                Coordinate(-2, 1)
+                Coordinate(1, 0, 1),
+                Coordinate(2, 0, 2),
+                Coordinate(2, 1, 3),
+                Coordinate(1, 1, 4),
+                Coordinate(0, 1, 5),
+                Coordinate(-1, 1, 6),
+                Coordinate(-2, 1, 7)
             )
         )
     }
