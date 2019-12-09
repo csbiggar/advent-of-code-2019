@@ -1,20 +1,39 @@
 package day2
 
+import FileReader
+import day2.Program.runWithNounAndVerbOverrides
+
 
 fun main() {
-    val programInput = FileReader.readFile("day2/gravity-assist-program.txt").split(",").toMutableList()
-    programInput[1] = "12"
-    programInput[2] = "2"
+    val input = FileReader.readFile("day2/gravity-assist-program.txt")
 
-    val result = Program.run(programInput.joinToString(","))
+    val (noun, verb) = findNounAndVerbGiving(input, "19690720")
 
-    println(result)
+    println("noun $noun verb $verb. Answer: ${100 * noun + verb} ")
 }
+
+private fun findNounAndVerbGiving(input: String, requiredOutput: String): Pair<Int, Int> {
+    (0..99).forEach { noun ->
+        (0..99).forEach { verb ->
+            val result = runWithNounAndVerbOverrides(noun, verb, input)
+            if (result.substringBefore(",") == requiredOutput) return Pair(noun, verb)
+        }
+    }
+    throw IllegalStateException("No combination produced the result")
+}
+
 
 object Program {
 
-    fun run(program: String): String {
-        val output = program.split(",").map { it.toInt() }.toMutableList()
+    fun runWithNounAndVerbOverrides(noun: Int, verb: Int, programInput: String): String {
+        val program = programInput.split(",").map { it.toInt() }.toMutableList()
+        program[1] = noun
+        program[2] = verb
+        return run(program.joinToString(","))
+    }
+
+    fun run(programInput: String): String {
+        val output = programInput.split(",").map { it.toInt() }.toMutableList()
         var index = 0
 
         loop@ while (index + 4 < output.size) {
