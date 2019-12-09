@@ -1,5 +1,6 @@
 package day1
 
+import FileReader
 
 tailrec fun calculateFuel(mass: Int, fuelRunningTotal: Int = 0): Int {
     val extraFuelMass = mass / 3 - 2
@@ -11,13 +12,7 @@ tailrec fun calculateFuel(mass: Int, fuelRunningTotal: Int = 0): Int {
 fun totalFuelRequired(masses: List<Int>) = masses.map { calculateFuel(it) }.sum()
 
 fun main() {
-    val moduleMasses = FileReader.readFileAsIntegers("module-masses.csv")
+    val moduleMasses = FileReader.readFileAsIntegers("day1/module-masses.csv")
     println(totalFuelRequired(moduleMasses))
 }
 
-object FileReader {
-    fun readFileAsIntegers(fileName: String) = this::class.java.getResourceAsStream(fileName)
-        .bufferedReader()
-        .readLines()
-        .map { it.toInt() }
-}
