@@ -7,33 +7,40 @@ fun main() {
     println("done... ")
 }
 
-class Program(private val instructions: String) {
+class Program(initialInstructions: String) {
 
-    fun run(input: Int? = null): String {
-        val output = instructions.split(",").map { it.toInt() }.toMutableList()
+    private var instructions = initialInstructions.split(",").map { it.toInt() }.toMutableList()
+    private var output: Int? = null
+
+    fun showMeTheInstructions() = instructions.joinToString(",")
+
+    fun run(input: Int? = null): Int? {
         var index = 0
 
-        loop@ while (index < output.size) {
-            val instruction = InstructionFactory.from(output, index)
+        loop@ while (index < instructions.size) {
+            val current = InstructionFactory.from(instructions, index)
 
-            when (instruction) {
+            when (current) {
                 is Add -> {
-                    output[instruction.resultIndex] = output[instruction.firstIndex] + output[instruction.secondIndex]
+                    instructions[current.resultIndex] = instructions[current.firstIndex] + instructions[current.secondIndex]
                 }
                 is Multiply -> {
-                    output[instruction.resultIndex] = output[instruction.firstIndex] * output[instruction.secondIndex]
+                    instructions[current.resultIndex] = instructions[current.firstIndex] * instructions[current.secondIndex]
                 }
                 is Save -> {
-                    output[instruction.resultIndex] =
+                    instructions[current.resultIndex] =
                         input ?: throw IllegalArgumentException("Save instruction should come with an input")
+                }
+                is Output -> {
+                    output = instructions[current.resultIndex]
                 }
                 is Terminate -> break@loop
             }
 
-            index += instruction.moveIndexOnBy
+            index += current.moveIndexOnBy
         }
 
-        return output.joinToString(",")
+        return output
     }
 }
 
@@ -50,6 +57,10 @@ class Multiply(val firstIndex: Int, val secondIndex: Int, val resultIndex: Int) 
 }
 
 class Save(val resultIndex: Int) : Instruction() {
+    override val moveIndexOnBy: Int = 2
+}
+
+class Output(val resultIndex: Int) : Instruction() {
     override val moveIndexOnBy: Int = 2
 }
 
@@ -72,6 +83,7 @@ object InstructionFactory {
                 resultIndex = instructions[index + 3]
             )
             3 -> Save(resultIndex = instructions[index + 1])
+            4 -> Output(resultIndex = instructions[index + 1])
             99 -> Terminate
             else -> throw IllegalArgumentException("Whoops, operation ${instructions[index]} not recognised - something's gone wrong")
         }
