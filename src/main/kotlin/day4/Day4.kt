@@ -38,8 +38,8 @@ private fun containsExactDouble(number: Int): Boolean {
 
 private fun digitAfterPairIsDifferent(digits: List<Int>, index: Int): Boolean {
     val lastIndex = digits.size - 1
-    val indexBeyondNext = index + 2
-    return indexBeyondNext > lastIndex || digits[indexBeyondNext] != digits[index]
+    val indexBeyondPair = index + 2
+    return indexBeyondPair > lastIndex || digits[indexBeyondPair] != digits[index]
 }
 
 private fun digitBeforePairIsDifferent(digits: List<Int>, index: Int): Boolean {
