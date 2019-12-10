@@ -1,7 +1,6 @@
 package day5
 
 import FileReader
-import day5.ParameterMode.POSITION
 
 fun main() {
     val program = FileReader.readFile("day5/program.txt")
@@ -74,19 +73,30 @@ object Terminate : Instruction() {
 object InstructionFactory {
 
     fun from(instructions: List<Int>, index: Int): Instruction {
-        return when (instructions[index]) {
+
+        // Position: 0 1 2 34
+        // Eg code : 0 1 0 02
+        val code = instructions[index].toString().padStart(5, '0')
+        val operator = listOf(
+            code.takeLast(2).toInt(),
+            code[2].toString().toInt(),
+            code[1].toString().toInt(),
+            code[0].toString().toInt()
+        )
+
+        return when (operator.first()) {
             1 -> Add(
-                first = Parameter(POSITION, instructions[index + 1]),
-                second = Parameter(POSITION, instructions[index + 2]),
-                result = Parameter(POSITION, instructions[index + 3])
+                first = Parameter(ParameterMode.fromId(operator[1]), instructions[index + 1]),
+                second = Parameter(ParameterMode.fromId(operator[2]), instructions[index + 2]),
+                result = Parameter(ParameterMode.fromId(operator[3]), instructions[index + 3])
             )
             2 -> Multiply(
-                first = Parameter(POSITION, instructions[index + 1]),
-                second = Parameter(POSITION, instructions[index + 2]),
-                result = Parameter(POSITION, instructions[index + 3])
+                first = Parameter(ParameterMode.fromId(operator[1]), instructions[index + 1]),
+                second = Parameter(ParameterMode.fromId(operator[2]), instructions[index + 2]),
+                result = Parameter(ParameterMode.fromId(operator[3]), instructions[index + 3])
             )
-            3 -> Save(result = Parameter(POSITION, instructions[index + 1]))
-            4 -> Output(result = Parameter(POSITION, instructions[index + 1]))
+            3 -> Save(result = Parameter(ParameterMode.fromId(operator[1]), instructions[index + 1]))
+            4 -> Output(result = Parameter(ParameterMode.fromId(operator[1]), instructions[index + 1]))
             99 -> Terminate
             else -> throw IllegalArgumentException("Whoops, operation ${instructions[index]} not recognised - something's gone wrong")
         }
@@ -96,6 +106,10 @@ object InstructionFactory {
 
 data class Parameter(val mode: ParameterMode, val value: Int)
 
-enum class ParameterMode {
-    POSITION, IMMEDIATE
+enum class ParameterMode(private val id: Int) {
+    POSITION(0), IMMEDIATE(1);
+
+    companion object {
+        fun fromId(id: Int) = ParameterMode.values().first { it.id == id }
+    }
 }
