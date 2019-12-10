@@ -30,7 +30,7 @@ class Program(private val instructions: String) {
                 is Terminate -> break@loop
             }
 
-            index += instruction.numberOfValues
+            index += instruction.moveIndexOnBy
         }
 
         return output.joinToString(",")
@@ -38,23 +38,23 @@ class Program(private val instructions: String) {
 }
 
 sealed class Instruction {
-    abstract val numberOfValues: Int
+    abstract val moveIndexOnBy: Int
 }
 
 class Add(val firstIndex: Int, val secondIndex: Int, val resultIndex: Int) : Instruction() {
-    override val numberOfValues: Int = 4
+    override val moveIndexOnBy: Int = 4
 }
 
 class Multiply(val firstIndex: Int, val secondIndex: Int, val resultIndex: Int) : Instruction() {
-    override val numberOfValues: Int = 4
+    override val moveIndexOnBy: Int = 4
 }
 
 class Save(val resultIndex: Int) : Instruction() {
-    override val numberOfValues: Int = 2
+    override val moveIndexOnBy: Int = 2
 }
 
 object Terminate : Instruction() {
-    override val numberOfValues: Int = 1
+    override val moveIndexOnBy: Int = 1
 }
 
 object InstructionFactory {
