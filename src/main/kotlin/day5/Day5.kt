@@ -1,6 +1,7 @@
 package day5
 
 import FileReader
+import day5.ParameterMode.POSITION
 
 fun main() {
     val program = FileReader.readFile("day5/program.txt")
@@ -22,17 +23,19 @@ class Program(initialInstructions: String) {
 
             when (current) {
                 is Add -> {
-                    instructions[current.resultIndex] = instructions[current.firstIndex] + instructions[current.secondIndex]
+                    instructions[current.result.value] =
+                        instructions[current.first.value] + instructions[current.second.value]
                 }
                 is Multiply -> {
-                    instructions[current.resultIndex] = instructions[current.firstIndex] * instructions[current.secondIndex]
+                    instructions[current.result.value] =
+                        instructions[current.first.value] * instructions[current.second.value]
                 }
                 is Save -> {
-                    instructions[current.resultIndex] =
+                    instructions[current.result.value] =
                         input ?: throw IllegalArgumentException("Save instruction should come with an input")
                 }
                 is Output -> {
-                    output = instructions[current.resultIndex]
+                    output = instructions[current.result.value]
                 }
                 is Terminate -> break@loop
             }
@@ -48,19 +51,19 @@ sealed class Instruction {
     abstract val moveIndexOnBy: Int
 }
 
-class Add(val firstIndex: Int, val secondIndex: Int, val resultIndex: Int) : Instruction() {
+class Add(val first: Parameter, val second: Parameter, val result: Parameter) : Instruction() {
     override val moveIndexOnBy: Int = 4
 }
 
-class Multiply(val firstIndex: Int, val secondIndex: Int, val resultIndex: Int) : Instruction() {
+class Multiply(val first: Parameter, val second: Parameter, val result: Parameter) : Instruction() {
     override val moveIndexOnBy: Int = 4
 }
 
-class Save(val resultIndex: Int) : Instruction() {
+class Save(val result: Parameter) : Instruction() {
     override val moveIndexOnBy: Int = 2
 }
 
-class Output(val resultIndex: Int) : Instruction() {
+class Output(val result: Parameter) : Instruction() {
     override val moveIndexOnBy: Int = 2
 }
 
@@ -73,20 +76,26 @@ object InstructionFactory {
     fun from(instructions: List<Int>, index: Int): Instruction {
         return when (instructions[index]) {
             1 -> Add(
-                firstIndex = instructions[index + 1],
-                secondIndex = instructions[index + 2],
-                resultIndex = instructions[index + 3]
+                first = Parameter(POSITION, instructions[index + 1]),
+                second = Parameter(POSITION, instructions[index + 2]),
+                result = Parameter(POSITION, instructions[index + 3])
             )
             2 -> Multiply(
-                firstIndex = instructions[index + 1],
-                secondIndex = instructions[index + 2],
-                resultIndex = instructions[index + 3]
+                first = Parameter(POSITION, instructions[index + 1]),
+                second = Parameter(POSITION, instructions[index + 2]),
+                result = Parameter(POSITION, instructions[index + 3])
             )
-            3 -> Save(resultIndex = instructions[index + 1])
-            4 -> Output(resultIndex = instructions[index + 1])
+            3 -> Save(result = Parameter(POSITION, instructions[index + 1]))
+            4 -> Output(result = Parameter(POSITION, instructions[index + 1]))
             99 -> Terminate
             else -> throw IllegalArgumentException("Whoops, operation ${instructions[index]} not recognised - something's gone wrong")
         }
     }
 
+}
+
+data class Parameter(val mode: ParameterMode, val value: Int)
+
+enum class ParameterMode {
+    POSITION, IMMEDIATE
 }
