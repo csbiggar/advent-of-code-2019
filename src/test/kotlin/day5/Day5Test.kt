@@ -88,4 +88,11 @@ internal class Day5Test {
         assertThat(program.showMeTheInstructions()).isEqualTo("1101,100,-1,4,99")
     }
 
+//    @Test
+//    fun `should tell if input is equal to 8`(){
+//        val program = Program("3,9,8,9,10,9,4,9,99,-1,8")
+//        assertThat(program.run(8)).`as`("return true when input is 8").isEqualTo(0)
+//        assertThat(program.run(9)).`as`("return false when input is not 8").isEqualTo(1)
+//    }
+
 }

@@ -130,4 +130,31 @@ internal class InstructionFactoryTest {
 
         if (instruction !is Terminate) fail("Should be Terminate")
     }
+
+    @Test
+    fun `should create a jump-if-true instruction`() {
+        val instruction = InstructionFactory.from(listOf(5,9,10), 0)
+
+        if (instruction !is JumpIfTrue) fail("Should be JumpIfTrue")
+        assertThat(instruction.first).`as`("first").isEqualTo(Parameter(POSITION, 9))
+        assertThat(instruction.second).`as`("second").isEqualTo(Parameter(POSITION, 10))
+    }
+
+    @ParameterizedTest(name = "{0} is {1} {2}")
+    @CsvSource(
+        "5,POSITION,POSITION",
+        "105,IMMEDIATE,POSITION",
+        "1105,IMMEDIATE,IMMEDIATE"
+    )
+    fun `should set parameter modes for jumpIfTrue instruction`(
+        operation: Int,
+        expectedFirst: ParameterMode,
+        expectedSecond: ParameterMode
+    ) {
+        val instruction = InstructionFactory.from(listOf(operation, 4, 3, 4), 0)
+
+        if (instruction !is JumpIfTrue) fail("Should be JumpIfTrue")
+        assertThat(instruction.first.mode).isEqualTo(expectedFirst)
+        assertThat(instruction.second.mode).isEqualTo(expectedSecond)
+    }
 }

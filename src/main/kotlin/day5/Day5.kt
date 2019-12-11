@@ -98,6 +98,10 @@ class Output(val result: Parameter) : Instruction() {
     override val moveIndexOnBy: Int = 2
 }
 
+class JumpIfTrue(val first: Parameter, val second: Parameter) : Instruction() {
+    override val moveIndexOnBy: Int = 3
+}
+
 object Terminate : Instruction() {
     override val moveIndexOnBy: Int = 1
 }
@@ -109,32 +113,24 @@ object InstructionFactory {
         // Position: 0 1 2 34
         // Eg code : 0 1 0 02
         val code = instructions[index].toString().padStart(5, '0')
-        val operator = listOf(
-            code.takeLast(2).toInt(),
-            code[2].toString().toInt(),
-            code[1].toString().toInt(),
-            code[0].toString().toInt()
-        )
 
-        return when (operator.first()) {
-            1 -> Add(
-                first = Parameter(ParameterMode.fromId(operator[1]), instructions[index + 1]),
-                second = Parameter(ParameterMode.fromId(operator[2]), instructions[index + 2]),
-                result = Parameter(ParameterMode.fromId(operator[3]), instructions[index + 3])
-            )
-            2 -> Multiply(
-                first = Parameter(ParameterMode.fromId(operator[1]), instructions[index + 1]),
-                second = Parameter(ParameterMode.fromId(operator[2]), instructions[index + 2]),
-                result = Parameter(ParameterMode.fromId(operator[3]), instructions[index + 3])
-            )
-            3 -> Save(result = Parameter(ParameterMode.fromId(operator[1]), instructions[index + 1]))
-            4 -> Output(result = Parameter(ParameterMode.fromId(operator[1]), instructions[index + 1]))
+        val first: Parameter by lazy { Parameter(ParameterMode.fromId(code.getAsInt(2)), instructions[index + 1]) }
+        val second: Parameter by lazy { Parameter(ParameterMode.fromId(code.getAsInt(1)), instructions[index + 2]) }
+        val third: Parameter by lazy { Parameter(ParameterMode.fromId(code.getAsInt(0)), instructions[index + 3]) }
+
+        return when (code.takeLast(2).toInt()) {
+            1 -> Add(first, second, third)
+            2 -> Multiply(first, second, third)
+            3 -> Save(first)
+            4 -> Output(first)
+            5 -> JumpIfTrue(first, second)
             99 -> Terminate
             else -> throw IllegalArgumentException("Whoops, operation ${instructions[index]} not recognised - something's gone wrong")
         }
     }
-
 }
+
+fun String.getAsInt(index: Int) = this[index].toString().toInt()
 
 data class Parameter(val mode: ParameterMode, val value: Int)
 
