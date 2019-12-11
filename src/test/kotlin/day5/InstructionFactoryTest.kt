@@ -157,4 +157,97 @@ internal class InstructionFactoryTest {
         assertThat(instruction.first.mode).isEqualTo(expectedFirst)
         assertThat(instruction.second.mode).isEqualTo(expectedSecond)
     }
+
+    @Test
+    fun `should create a jump-if-false instruction`() {
+        val instruction = InstructionFactory.from(listOf(6,9,10), 0)
+
+        if (instruction !is JumpIfFalse) fail("Should be JumpIfFalse")
+        assertThat(instruction.first).`as`("first").isEqualTo(Parameter(POSITION, 9))
+        assertThat(instruction.second).`as`("second").isEqualTo(Parameter(POSITION, 10))
+    }
+
+    @ParameterizedTest(name = "{0} is {1} {2}")
+    @CsvSource(
+        "6,POSITION,POSITION",
+        "106,IMMEDIATE,POSITION",
+        "1106,IMMEDIATE,IMMEDIATE"
+    )
+    fun `should set parameter modes for JumpIfFalse instruction`(
+        operation: Int,
+        expectedFirst: ParameterMode,
+        expectedSecond: ParameterMode
+    ) {
+        val instruction = InstructionFactory.from(listOf(operation, 4, 3, 4), 0)
+
+        if (instruction !is JumpIfFalse) fail("Should be JumpIfFalse")
+        assertThat(instruction.first.mode).isEqualTo(expectedFirst)
+        assertThat(instruction.second.mode).isEqualTo(expectedSecond)
+    }
+
+    @Test
+    fun `should create a less than instruction`() {
+        val instruction = InstructionFactory.from(listOf(1007, 4, 3, 4), 0)
+
+        if (instruction !is LessThan) fail("Should be LessThan")
+
+        assertThat(instruction.first).`as`("first").isEqualTo(Parameter(POSITION, 4))
+        assertThat(instruction.second).`as`("second").isEqualTo(Parameter(IMMEDIATE, 3))
+        assertThat(instruction.result).`as`("result").isEqualTo(Parameter(POSITION, 4))
+    }
+
+    @ParameterizedTest(name = "{0} is {1} {2} {3}")
+    @CsvSource(
+        "7,POSITION,POSITION,POSITION",
+        "107,IMMEDIATE,POSITION,POSITION",
+        "1107,IMMEDIATE,IMMEDIATE,POSITION",
+        "11107,IMMEDIATE,IMMEDIATE,IMMEDIATE",
+        "10007,POSITION,POSITION,IMMEDIATE"
+    )
+    fun `should set parameter modes for less than instruction`(
+        operation: Int,
+        expectedFirst: ParameterMode,
+        expectedSecond: ParameterMode,
+        expectedResult: ParameterMode
+    ) {
+        val instruction = InstructionFactory.from(listOf(operation, 4, 3, 4), 0)
+
+        if (instruction !is LessThan) fail("Should be LessThan")
+        assertThat(instruction.first.mode).isEqualTo(expectedFirst)
+        assertThat(instruction.second.mode).isEqualTo(expectedSecond)
+        assertThat(instruction.result.mode).isEqualTo(expectedResult)
+    }
+
+    @Test
+    fun `should create an Equals instruction`() {
+        val instruction = InstructionFactory.from(listOf(1008, 4, 3, 4), 0)
+
+        if (instruction !is Equals) fail("Should be Equals")
+
+        assertThat(instruction.first).`as`("first").isEqualTo(Parameter(POSITION, 4))
+        assertThat(instruction.second).`as`("second").isEqualTo(Parameter(IMMEDIATE, 3))
+        assertThat(instruction.result).`as`("result").isEqualTo(Parameter(POSITION, 4))
+    }
+
+    @ParameterizedTest(name = "{0} is {1} {2} {3}")
+    @CsvSource(
+        "8,POSITION,POSITION,POSITION",
+        "108,IMMEDIATE,POSITION,POSITION",
+        "1108,IMMEDIATE,IMMEDIATE,POSITION",
+        "11108,IMMEDIATE,IMMEDIATE,IMMEDIATE",
+        "10008,POSITION,POSITION,IMMEDIATE"
+    )
+    fun `should set parameter modes for Equals instruction`(
+        operation: Int,
+        expectedFirst: ParameterMode,
+        expectedSecond: ParameterMode,
+        expectedResult: ParameterMode
+    ) {
+        val instruction = InstructionFactory.from(listOf(operation, 4, 3, 4), 0)
+
+        if (instruction !is Equals) fail("Should be Equals")
+        assertThat(instruction.first.mode).isEqualTo(expectedFirst)
+        assertThat(instruction.second.mode).isEqualTo(expectedSecond)
+        assertThat(instruction.result.mode).isEqualTo(expectedResult)
+    }
 }

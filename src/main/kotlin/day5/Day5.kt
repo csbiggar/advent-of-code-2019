@@ -102,6 +102,18 @@ class JumpIfTrue(val first: Parameter, val second: Parameter) : Instruction() {
     override val moveIndexOnBy: Int = 3
 }
 
+class JumpIfFalse(val first: Parameter, val second: Parameter) : Instruction() {
+    override val moveIndexOnBy: Int = 3
+}
+
+class LessThan(val first: Parameter, val second: Parameter, val result: Parameter) : Instruction() {
+    override val moveIndexOnBy: Int = 4
+}
+
+class Equals(val first: Parameter, val second: Parameter, val result: Parameter) : Instruction() {
+    override val moveIndexOnBy: Int = 4
+}
+
 object Terminate : Instruction() {
     override val moveIndexOnBy: Int = 1
 }
@@ -124,6 +136,9 @@ object InstructionFactory {
             3 -> Save(first)
             4 -> Output(first)
             5 -> JumpIfTrue(first, second)
+            6 -> JumpIfFalse(first, second)
+            7 -> LessThan(first, second, third)
+            8 -> Equals(first, second, third)
             99 -> Terminate
             else -> throw IllegalArgumentException("Whoops, operation ${instructions[index]} not recognised - something's gone wrong")
         }
