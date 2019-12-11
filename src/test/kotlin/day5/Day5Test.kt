@@ -61,14 +61,31 @@ internal class Day5Test {
     fun `option 3 and 4 combined`() {
         assertThat(Program("3,0,4,0,99").run(23)).isEqualTo(23)
     }
-//
-//    @Test
-//    fun `with all the new things`(){
-//        assertThat(Program("1002,4,3,4,33").run()).isEqualTo("1002,4,3,4,99")
-//    }
-//
-//    @Test
-//    fun `with all the new things 2`(){
-//        assertThat(Program("1101,100,-1,4,0").run()).isEqualTo("1101,100,-1,4,99")
-//    }
+
+    @Test
+    fun `multiply with mix of positional and immediate parameter modes`() {
+        val program = Program("1002,4,3,4,33")
+        program.run()
+        assertThat(program.showMeTheInstructions()).isEqualTo("1002,4,3,4,99")
+    }
+
+    @Test
+    fun `add with mix of positional and immediate parameter modes`() {
+        val program = Program("1001,4,3,0,99")
+        program.run()
+        assertThat(program.showMeTheInstructions()).isEqualTo("102,4,3,0,99")
+    }
+
+    @Test
+    fun `immediate mode for an output operation`() {
+        assertThat(Program("104,58,99").run()).isEqualTo(58)
+    }
+
+    @Test
+    fun `should handle negatives`() {
+        val program = Program("1101,100,-1,4,0")
+        program.run()
+        assertThat(program.showMeTheInstructions()).isEqualTo("1101,100,-1,4,99")
+    }
+
 }

@@ -1,10 +1,13 @@
 package day5
 
 import FileReader
+import day5.ParameterMode.IMMEDIATE
+import day5.ParameterMode.POSITION
 
 fun main() {
-    val program = FileReader.readFile("day5/program.txt")
-    println("done... ")
+    val program = Program(FileReader.readFile("day5/program.txt"))
+    val result = program.run(1)
+    println("Result: $result (should be 13285749)")
 }
 
 class Program(initialInstructions: String) {
@@ -21,21 +24,10 @@ class Program(initialInstructions: String) {
             val current = InstructionFactory.from(instructions, index)
 
             when (current) {
-                is Add -> {
-                    instructions[current.result.value] =
-                        instructions[current.first.value] + instructions[current.second.value]
-                }
-                is Multiply -> {
-                    instructions[current.result.value] =
-                        instructions[current.first.value] * instructions[current.second.value]
-                }
-                is Save -> {
-                    instructions[current.result.value] =
-                        input ?: throw IllegalArgumentException("Save instruction should come with an input")
-                }
-                is Output -> {
-                    output = instructions[current.result.value]
-                }
+                is Add -> applyAdd(current)
+                is Multiply -> applyMultiply(current)
+                is Save -> save(current, input)
+                is Output -> output = findOutput(current)
                 is Terminate -> break@loop
             }
 
@@ -43,6 +35,46 @@ class Program(initialInstructions: String) {
         }
 
         return output
+    }
+
+    private fun save(instruction: Save, input: Int?) {
+        instructions[instruction.result.value] =
+            input ?: throw IllegalArgumentException("Save instruction should come with an input")
+    }
+
+    private fun findOutput(output: Output): Int {
+        return when (output.result.mode) {
+            POSITION -> instructions[output.result.value]
+            IMMEDIATE -> output.result.value
+        }
+    }
+
+    private fun applyMultiply(multiply: Multiply) {
+        val x = when (multiply.first.mode) {
+            POSITION -> instructions[multiply.first.value]
+            IMMEDIATE -> multiply.first.value
+        }
+
+        val y = when (multiply.second.mode) {
+            POSITION -> instructions[multiply.second.value]
+            IMMEDIATE -> multiply.second.value
+        }
+
+        instructions[multiply.result.value] = x * y
+    }
+
+    private fun applyAdd(add: Add) {
+        val x = when (add.first.mode) {
+            POSITION -> instructions[add.first.value]
+            IMMEDIATE -> add.first.value
+        }
+
+        val y = when (add.second.mode) {
+            POSITION -> instructions[add.second.value]
+            IMMEDIATE -> add.second.value
+        }
+
+        instructions[add.result.value] = x + y
     }
 }
 
@@ -110,6 +142,6 @@ enum class ParameterMode(private val id: Int) {
     POSITION(0), IMMEDIATE(1);
 
     companion object {
-        fun fromId(id: Int) = ParameterMode.values().first { it.id == id }
+        fun fromId(id: Int) = values().first { it.id == id }
     }
 }
