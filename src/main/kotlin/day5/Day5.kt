@@ -5,9 +5,11 @@ import day5.ParameterMode.IMMEDIATE
 import day5.ParameterMode.POSITION
 
 fun main() {
-    val program = Program(FileReader.readFile("day5/program.txt"))
-    val result = program.run(1)
-    println("Result: $result (should be 13285749)")
+    val result1 = Program(FileReader.readFile("day5/program.txt")).run(1)
+    println("Result: $result1 (should be 13285749)")
+
+    val result2 = Program(FileReader.readFile("day5/program.txt")).run(5)
+    println("Result: $result2 (should be ??)")
 }
 
 class Program(initialInstructions: String) {
@@ -22,40 +24,68 @@ class Program(initialInstructions: String) {
 
         loop@ while (index < instructions.size) {
             val current = InstructionFactory.from(instructions, index)
-            var moveIndexOnBy = current.moveIndexOnBy
 
             when (current) {
-                is Add -> applyAdd(current)
-                is Multiply -> applyMultiply(current)
-                is Save -> save(current, input)
-                is Output -> output = findOutput(current)
-                is JumpIfTrue -> moveIndexOnBy = findNewPointerPosition(current)
-                is JumpIfFalse -> moveIndexOnBy = findNewPointerPosition(current)
-                is LessThan -> lessThan(current)
-                is Equals -> areTheyEqual(current)
+                is Add -> {
+                    applyAdd(current)
+                    index += current.moveIndexOnBy
+                }
+                is Multiply -> {
+                    applyMultiply(current)
+                    index += current.moveIndexOnBy
+                }
+                is Save -> {
+                    save(current, input)
+                    index += current.moveIndexOnBy
+                }
+                is Output -> {
+                    output = findOutput(current)
+                    index += current.moveIndexOnBy
+                }
+                is JumpIfTrue -> {
+                    index = newPointerPosition(current, index)
+                }
+                is JumpIfFalse -> {
+                    index = newPointerPosition(current, index)
+                }
+                is LessThan -> {
+                    lessThan(current)
+                    index += current.moveIndexOnBy
+                }
+                is Equals -> {
+                    areTheyEqual(current)
+                    index += current.moveIndexOnBy
+                }
                 is Terminate -> break@loop
             }
 
-            index += moveIndexOnBy
         }
 
         return output
     }
 
-    private fun findNewPointerPosition(jump: JumpIfTrue): Int {
-        if (jump.first.value == 0) return jump.moveIndexOnBy
-        return when (jump.second.mode) {
+    private fun newPointerPosition(jump: JumpIfTrue, index: Int): Int {
+        val x = when (jump.first.mode) {
+            POSITION -> instructions[jump.first.value]
+            IMMEDIATE -> jump.first.value
+        }
+        val y = when (jump.second.mode) {
             POSITION -> instructions[jump.second.value]
             IMMEDIATE -> jump.second.value
         }
+        return if (x != 0) y else index + jump.moveIndexOnBy
     }
 
-    private fun findNewPointerPosition(jump: JumpIfFalse): Int {
-        if (jump.first.value != 0) return jump.moveIndexOnBy
-        return when (jump.second.mode) {
+    private fun newPointerPosition(jump: JumpIfFalse, index: Int): Int {
+        val x = when (jump.first.mode) {
+            POSITION -> instructions[jump.first.value]
+            IMMEDIATE -> jump.first.value
+        }
+        val y = when (jump.second.mode) {
             POSITION -> instructions[jump.second.value]
             IMMEDIATE -> jump.second.value
         }
+        return if (x == 0) y else index + jump.moveIndexOnBy
     }
 
     private fun save(instruction: Save, input: Int?) {
