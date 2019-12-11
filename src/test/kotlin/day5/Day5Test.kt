@@ -1,8 +1,8 @@
 package day5
 
+import FileReader
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.fail
 
 internal class Day5Test {
 
@@ -194,5 +194,15 @@ internal class Day5Test {
         assertThat(Program(initialInstructions).run(7)).`as`("less than 8").isEqualTo(999)
         assertThat(Program(initialInstructions).run(8)).`as`("is 8").isEqualTo(1000)
         assertThat(Program(initialInstructions).run(9)).`as`("greater than  8").isEqualTo(1001)
+    }
+
+    @Test
+    fun `test real part 1`(){
+        assertThat(Program(FileReader.readFile("day5/program.txt")).run(1)).isEqualTo(13285749)
+    }
+
+    @Test
+    fun `test real part 2`() {
+        assertThat(Program(FileReader.readFile("day5/program.txt")).run(5)).isEqualTo(5000972)
     }
 }
