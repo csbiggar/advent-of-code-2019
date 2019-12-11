@@ -89,6 +89,63 @@ internal class Day5Test {
     }
 
     @Test
+    fun `less than, immediate`(){
+        val program = Program("1107,23,42,0,99")
+        program.run()
+        assertThat(program.showMeTheInstructions()).isEqualTo("1,23,42,0,99")
+    }
+
+    @Test
+    fun `less than, positional`(){
+        val program = Program("7,3,2,0,99")
+        program.run()
+        assertThat(program.showMeTheInstructions()).isEqualTo("1,3,2,0,99")
+    }
+
+    @Test
+    fun `not less than, immediate`(){
+        val program = Program("1107,53,42,0,99")
+        program.run()
+        assertThat(program.showMeTheInstructions()).isEqualTo("0,53,42,0,99")
+    }
+
+    @Test
+    fun `not less than, positional`(){
+        val program = Program("7,0,2,0,99")
+        program.run()
+        assertThat(program.showMeTheInstructions()).isEqualTo("0,0,2,0,99")
+    }
+
+
+    @Test
+    fun `equals, immediate`(){
+        val program = Program("1108,23,23,0,99")
+        program.run()
+        assertThat(program.showMeTheInstructions()).isEqualTo("1,23,23,0,99")
+    }
+
+    @Test
+    fun `equals, positional`(){
+        val program = Program("8,1,1,0,99")
+        program.run()
+        assertThat(program.showMeTheInstructions()).isEqualTo("1,1,1,0,99")
+    }
+
+    @Test
+    fun `not equals, immediate`(){
+        val program = Program("1108,53,42,0,99")
+        program.run()
+        assertThat(program.showMeTheInstructions()).isEqualTo("0,53,42,0,99")
+    }
+
+    @Test
+    fun `not equals, positional`(){
+        val program = Program("8,0,2,0,99")
+        program.run()
+        assertThat(program.showMeTheInstructions()).isEqualTo("0,0,2,0,99")
+    }
+
+    @Test
     fun `should tell if input is equal to 8, position mode`() {
         val program = Program("3,9,8,9,10,9,4,9,99,-1,8")
         assertThat(program.run(8)).`as`("return true when input is 8").isEqualTo(0)
