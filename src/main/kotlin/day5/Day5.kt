@@ -109,7 +109,7 @@ class Program(initialInstructions: String) {
             IMMEDIATE -> lessThan.second.value
         }
 
-        instructions[lessThan.result.value] = if (x < y) 0 else 1
+        instructions[lessThan.result.value] = if (x < y) 1 else 0
     }
 
     private fun areTheyEqual(equals: Equals) {
@@ -123,7 +123,7 @@ class Program(initialInstructions: String) {
             IMMEDIATE -> equals.second.value
         }
 
-        instructions[equals.result.value] = if (x == y) 0 else 1
+        instructions[equals.result.value] = if (x == y) 1 else 0
     }
 }
 
