@@ -148,45 +148,45 @@ internal class Day5Test {
     @Test
     fun `should tell if input is equal to 8, position mode`() {
         val program = Program("3,9,8,9,10,9,4,9,99,-1,8")
-        assertThat(program.run(8)).`as`("return true when input is 8").isEqualTo(0)
-        assertThat(program.run(9)).`as`("return false when input is not 8").isEqualTo(1)
+        assertThat(program.run(8)).`as`("return true when input is 8").isEqualTo(1)
+        assertThat(program.run(9)).`as`("return false when input is not 8").isEqualTo(0)
     }
 
     @Test
     fun `should tell if input is less than 8, position mode`() {
         val program = Program("3,9,7,9,10,9,4,9,99,-1,8")
-        assertThat(program.run(7)).`as`("return true when input is less than 8").isEqualTo(0)
-        assertThat(program.run(8)).`as`("return false when input is 8").isEqualTo(1)
-        assertThat(program.run(9)).`as`("return false when input is greater than  8").isEqualTo(1)
+        assertThat(program.run(7)).`as`("return true when input is less than 8").isEqualTo(1)
+        assertThat(program.run(8)).`as`("return false when input is 8").isEqualTo(0)
+        assertThat(program.run(9)).`as`("return false when input is greater than  8").isEqualTo(0)
     }
 
     @Test
     fun `should tell if input is equal to 8, immediate mode`() {
         val program = Program("3,3,1108,-1,8,3,4,3,99")
-        assertThat(program.run(8)).`as`("return true when input is 8").isEqualTo(0)
-        assertThat(program.run(9)).`as`("return false when input is not 8").isEqualTo(1)
+        assertThat(program.run(8)).`as`("return true when input is 8").isEqualTo(1)
+        assertThat(program.run(9)).`as`("return false when input is not 8").isEqualTo(0)
     }
 
     @Test
     fun `should tell if input is less than 8, immediate mode`() {
         val program = Program("3,3,1107,-1,8,3,4,3,99")
-        assertThat(program.run(7)).`as`("return true when input is less than 8").isEqualTo(0)
-        assertThat(program.run(8)).`as`("return false when input is 8").isEqualTo(1)
-        assertThat(program.run(9)).`as`("return false when input is greater than  8").isEqualTo(1)
+        assertThat(program.run(7)).`as`("return true when input is less than 8").isEqualTo(1)
+        assertThat(program.run(8)).`as`("return false when input is 8").isEqualTo(0)
+        assertThat(program.run(9)).`as`("return false when input is greater than  8").isEqualTo(0)
     }
 
     @Test
     fun `should tell if input is non-zero, position mode`() {
         val program = Program("3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9")
-        assertThat(program.run(0)).`as`("return true when input is 0").isEqualTo(0)
-        assertThat(program.run(9)).`as`("return false when input is not 0").isEqualTo(1)
+        assertThat(program.run(0)).`as`("return true when input is 0").isEqualTo(1)
+        assertThat(program.run(9)).`as`("return false when input is not 0").isEqualTo(0)
     }
 
     @Test
     fun `should tell if input is non-zero, immediate mode`() {
         val program = Program("3,3,1105,-1,9,1101,0,0,12,4,12,99,1")
-        assertThat(program.run(0)).`as`("return true when input is 0").isEqualTo(0)
-        assertThat(program.run(9)).`as`("return false when input is not 0").isEqualTo(1)
+        assertThat(program.run(0)).`as`("return true when input is 0").isEqualTo(1)
+        assertThat(program.run(9)).`as`("return false when input is not 0").isEqualTo(0)
     }
 
     @Test
