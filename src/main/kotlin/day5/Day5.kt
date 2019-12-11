@@ -22,19 +22,40 @@ class Program(initialInstructions: String) {
 
         loop@ while (index < instructions.size) {
             val current = InstructionFactory.from(instructions, index)
+            var moveIndexOnBy = current.moveIndexOnBy
 
             when (current) {
                 is Add -> applyAdd(current)
                 is Multiply -> applyMultiply(current)
                 is Save -> save(current, input)
                 is Output -> output = findOutput(current)
+                is JumpIfTrue -> moveIndexOnBy = findNewPointerPosition(current)
+                is JumpIfFalse -> moveIndexOnBy = findNewPointerPosition(current)
+                is LessThan -> lessThan(current)
+                is Equals -> areTheyEqual(current)
                 is Terminate -> break@loop
             }
 
-            index += current.moveIndexOnBy
+            index += moveIndexOnBy
         }
 
         return output
+    }
+
+    private fun findNewPointerPosition(jump: JumpIfTrue): Int {
+        if (jump.first.value == 0) return jump.moveIndexOnBy
+        return when (jump.second.mode) {
+            POSITION -> instructions[jump.second.value]
+            IMMEDIATE -> jump.second.value
+        }
+    }
+
+    private fun findNewPointerPosition(jump: JumpIfFalse): Int {
+        if (jump.first.value != 0) return jump.moveIndexOnBy
+        return when (jump.second.mode) {
+            POSITION -> instructions[jump.second.value]
+            IMMEDIATE -> jump.second.value
+        }
     }
 
     private fun save(instruction: Save, input: Int?) {
@@ -75,6 +96,34 @@ class Program(initialInstructions: String) {
         }
 
         instructions[add.result.value] = x + y
+    }
+
+    private fun lessThan(lessThan: LessThan) {
+        val x = when (lessThan.first.mode) {
+            POSITION -> instructions[lessThan.first.value]
+            IMMEDIATE -> lessThan.first.value
+        }
+
+        val y = when (lessThan.second.mode) {
+            POSITION -> instructions[lessThan.second.value]
+            IMMEDIATE -> lessThan.second.value
+        }
+
+        instructions[lessThan.result.value] = if (x < y) 0 else 1
+    }
+
+    private fun areTheyEqual(equals: Equals) {
+        val x = when (equals.first.mode) {
+            POSITION -> instructions[equals.first.value]
+            IMMEDIATE -> equals.first.value
+        }
+
+        val y = when (equals.second.mode) {
+            POSITION -> instructions[equals.second.value]
+            IMMEDIATE -> equals.second.value
+        }
+
+        instructions[equals.result.value] = if (x == y) 0 else 1
     }
 }
 
