@@ -12,7 +12,7 @@ tailrec fun calculateFuel(mass: Int, fuelRunningTotal: Int = 0): Int {
 fun totalFuelRequired(masses: List<Int>) = masses.map { calculateFuel(it) }.sum()
 
 fun main() {
-    val moduleMasses = FileReader.readFileAsIntegers("day1/module-masses.csv")
+    val moduleMasses = FileReader.readLinesAsIntegers("day1/module-masses.csv")
     println(totalFuelRequired(moduleMasses))
 }
 

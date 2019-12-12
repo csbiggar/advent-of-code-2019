@@ -1,5 +1,5 @@
 object FileReader {
-    fun readFileAsIntegers(fileName: String) = this::class.java.getResourceAsStream(fileName)
+    fun readLinesAsIntegers(fileName: String) = this::class.java.getResourceAsStream(fileName)
         .bufferedReader()
         .readLines()
         .map { it.toInt() }
