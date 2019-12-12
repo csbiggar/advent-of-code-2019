@@ -16,211 +16,139 @@ class Program(initialInstructions: String) {
 
     private var instructions = initialInstructions.split(",").map { it.toInt() }.toMutableList()
     private var output: Int? = null
+    private var pointer = 0
 
     fun showMeTheInstructions() = instructions.joinToString(",")
 
     fun run(input: Int? = null): Int? {
-        var index = 0
 
-        loop@ while (index < instructions.size) {
-            val current = InstructionFactory.from(instructions, index)
+        loop@ while (true) {
+            val code = instructions[pointer].toString().padStart(5, '0')
 
-            when (current) {
-                is Add -> {
-                    applyAdd(current)
-                    index += current.moveIndexOnBy
-                }
-                is Multiply -> {
-                    applyMultiply(current)
-                    index += current.moveIndexOnBy
-                }
-                is Save -> {
-                    save(current, input)
-                    index += current.moveIndexOnBy
-                }
-                is Output -> {
-                    output = findOutput(current)
-                    index += current.moveIndexOnBy
-                }
-                is JumpIfTrue -> {
-                    index = newPointerPosition(current, index)
-                }
-                is JumpIfFalse -> {
-                    index = newPointerPosition(current, index)
-                }
-                is LessThan -> {
-                    lessThan(current)
-                    index += current.moveIndexOnBy
-                }
-                is Equals -> {
-                    areTheyEqual(current)
-                    index += current.moveIndexOnBy
-                }
-                is Terminate -> break@loop
+            val operation = code.takeLast(2).toInt()
+            val first by lazy {
+                Parameter(ParameterMode.fromId(code.getAsInt(2)), instructions[pointer + 1])
+            }
+            val second by lazy {
+                Parameter(ParameterMode.fromId(code.getAsInt(1)), instructions[pointer + 2])
+            }
+            val third by lazy {
+                Parameter(ParameterMode.fromId(code.getAsInt(0)), instructions[pointer + 3])
             }
 
+            when (operation) {
+                1 -> applyAdd(first, second, third)
+                2 -> applyMultiply(first, second, third)
+                3 -> save(input, first)
+                4 -> output(first)
+                5 -> jumpIfTrue(first, second)
+                6 -> jumpIfFalse(first, second)
+                7 -> lessThan(first, second, third)
+                8 -> areTheyEqual(first, second, third)
+                99 -> break@loop
+                else -> throw IllegalArgumentException("Whoops, operation $operation not recognised - something's gone wrong")
+            }
         }
 
         return output
     }
 
-    private fun newPointerPosition(jump: JumpIfTrue, index: Int): Int {
-        val x = when (jump.first.mode) {
-            POSITION -> instructions[jump.first.value]
-            IMMEDIATE -> jump.first.value
+    private fun jumpIfTrue(first: Parameter, second: Parameter) {
+        val x = when (first.mode) {
+            POSITION -> instructions[first.value]
+            IMMEDIATE -> first.value
         }
-        val y = when (jump.second.mode) {
-            POSITION -> instructions[jump.second.value]
-            IMMEDIATE -> jump.second.value
+        val y = when (second.mode) {
+            POSITION -> instructions[second.value]
+            IMMEDIATE -> second.value
         }
-        return if (x != 0) y else index + jump.moveIndexOnBy
+        if (x != 0) pointer = y else pointer += 3
     }
 
-    private fun newPointerPosition(jump: JumpIfFalse, index: Int): Int {
-        val x = when (jump.first.mode) {
-            POSITION -> instructions[jump.first.value]
-            IMMEDIATE -> jump.first.value
+    private fun jumpIfFalse(first: Parameter, second: Parameter) {
+        val x = when (first.mode) {
+            POSITION -> instructions[first.value]
+            IMMEDIATE -> first.value
         }
-        val y = when (jump.second.mode) {
-            POSITION -> instructions[jump.second.value]
-            IMMEDIATE -> jump.second.value
+        val y = when (second.mode) {
+            POSITION -> instructions[second.value]
+            IMMEDIATE -> second.value
         }
-        return if (x == 0) y else index + jump.moveIndexOnBy
+        if (x == 0) pointer = y else pointer += 3
     }
 
-    private fun save(instruction: Save, input: Int?) {
-        instructions[instruction.result.value] =
+    private fun save(input: Int?, parameter: Parameter) {
+        instructions[parameter.value] =
             input ?: throw IllegalArgumentException("Save instruction should come with an input")
+        pointer += 2
     }
 
-    private fun findOutput(output: Output): Int {
-        return when (output.result.mode) {
-            POSITION -> instructions[output.result.value]
-            IMMEDIATE -> output.result.value
+    private fun output(parameter: Parameter) {
+        pointer += 2
+        output =  when (parameter.mode) {
+            POSITION -> instructions[parameter.value]
+            IMMEDIATE -> parameter.value
         }
     }
 
-    private fun applyMultiply(multiply: Multiply) {
-        val x = when (multiply.first.mode) {
-            POSITION -> instructions[multiply.first.value]
-            IMMEDIATE -> multiply.first.value
+    private fun applyMultiply(first: Parameter, second: Parameter, result: Parameter) {
+        val x = when (first.mode) {
+            POSITION -> instructions[first.value]
+            IMMEDIATE -> first.value
         }
 
-        val y = when (multiply.second.mode) {
-            POSITION -> instructions[multiply.second.value]
-            IMMEDIATE -> multiply.second.value
+        val y = when (second.mode) {
+            POSITION -> instructions[second.value]
+            IMMEDIATE -> second.value
         }
 
-        instructions[multiply.result.value] = x * y
+        instructions[result.value] = x * y
+        pointer += 4
     }
 
-    private fun applyAdd(add: Add) {
-        val x = when (add.first.mode) {
-            POSITION -> instructions[add.first.value]
-            IMMEDIATE -> add.first.value
+    private fun applyAdd(first: Parameter, second: Parameter, third: Parameter) {
+        val x = when (first.mode) {
+            POSITION -> instructions[first.value]
+            IMMEDIATE -> first.value
         }
 
-        val y = when (add.second.mode) {
-            POSITION -> instructions[add.second.value]
-            IMMEDIATE -> add.second.value
+        val y = when (second.mode) {
+            POSITION -> instructions[second.value]
+            IMMEDIATE -> second.value
         }
 
-        instructions[add.result.value] = x + y
+        instructions[third.value] = x + y
+        pointer += 4
     }
 
-    private fun lessThan(lessThan: LessThan) {
-        val x = when (lessThan.first.mode) {
-            POSITION -> instructions[lessThan.first.value]
-            IMMEDIATE -> lessThan.first.value
+    private fun lessThan(first: Parameter, second: Parameter, third: Parameter) {
+        val x = when (first.mode) {
+            POSITION -> instructions[first.value]
+            IMMEDIATE -> first.value
         }
 
-        val y = when (lessThan.second.mode) {
-            POSITION -> instructions[lessThan.second.value]
-            IMMEDIATE -> lessThan.second.value
+        val y = when (second.mode) {
+            POSITION -> instructions[second.value]
+            IMMEDIATE -> second.value
         }
 
-        instructions[lessThan.result.value] = if (x < y) 1 else 0
+        instructions[third.value] = if (x < y) 1 else 0
+        pointer += 4
     }
 
-    private fun areTheyEqual(equals: Equals) {
-        val x = when (equals.first.mode) {
-            POSITION -> instructions[equals.first.value]
-            IMMEDIATE -> equals.first.value
+    private fun areTheyEqual(first: Parameter, second: Parameter, third: Parameter) {
+        val x = when (first.mode) {
+            POSITION -> instructions[first.value]
+            IMMEDIATE -> first.value
         }
 
-        val y = when (equals.second.mode) {
-            POSITION -> instructions[equals.second.value]
-            IMMEDIATE -> equals.second.value
+        val y = when (second.mode) {
+            POSITION -> instructions[second.value]
+            IMMEDIATE -> second.value
         }
 
-        instructions[equals.result.value] = if (x == y) 1 else 0
-    }
-}
-
-sealed class Instruction {
-    abstract val moveIndexOnBy: Int
-}
-
-class Add(val first: Parameter, val second: Parameter, val result: Parameter) : Instruction() {
-    override val moveIndexOnBy: Int = 4
-}
-
-class Multiply(val first: Parameter, val second: Parameter, val result: Parameter) : Instruction() {
-    override val moveIndexOnBy: Int = 4
-}
-
-class Save(val result: Parameter) : Instruction() {
-    override val moveIndexOnBy: Int = 2
-}
-
-class Output(val result: Parameter) : Instruction() {
-    override val moveIndexOnBy: Int = 2
-}
-
-class JumpIfTrue(val first: Parameter, val second: Parameter) : Instruction() {
-    override val moveIndexOnBy: Int = 3
-}
-
-class JumpIfFalse(val first: Parameter, val second: Parameter) : Instruction() {
-    override val moveIndexOnBy: Int = 3
-}
-
-class LessThan(val first: Parameter, val second: Parameter, val result: Parameter) : Instruction() {
-    override val moveIndexOnBy: Int = 4
-}
-
-class Equals(val first: Parameter, val second: Parameter, val result: Parameter) : Instruction() {
-    override val moveIndexOnBy: Int = 4
-}
-
-object Terminate : Instruction() {
-    override val moveIndexOnBy: Int = 1
-}
-
-object InstructionFactory {
-
-    fun from(instructions: List<Int>, index: Int): Instruction {
-
-        // Position: 0 1 2 34
-        // Eg code : 0 1 0 02
-        val code = instructions[index].toString().padStart(5, '0')
-
-        val first: Parameter by lazy { Parameter(ParameterMode.fromId(code.getAsInt(2)), instructions[index + 1]) }
-        val second: Parameter by lazy { Parameter(ParameterMode.fromId(code.getAsInt(1)), instructions[index + 2]) }
-        val third: Parameter by lazy { Parameter(ParameterMode.fromId(code.getAsInt(0)), instructions[index + 3]) }
-
-        return when (code.takeLast(2).toInt()) {
-            1 -> Add(first, second, third)
-            2 -> Multiply(first, second, third)
-            3 -> Save(first)
-            4 -> Output(first)
-            5 -> JumpIfTrue(first, second)
-            6 -> JumpIfFalse(first, second)
-            7 -> LessThan(first, second, third)
-            8 -> Equals(first, second, third)
-            99 -> Terminate
-            else -> throw IllegalArgumentException("Whoops, operation ${instructions[index]} not recognised - something's gone wrong")
-        }
+        instructions[third.value] = if (x == y) 1 else 0
+        pointer += 4
     }
 }
 
