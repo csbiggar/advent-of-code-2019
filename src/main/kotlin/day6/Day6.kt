@@ -6,47 +6,17 @@ import day6.SpaceObject.Companion.YOU
 
 fun main() {
     val orbitsSpec = FileReader.readLines("day6/orbits.txt").joinToString(",")
-    println(countOrbits(orbitsSpec))
-    println(transfersRequired(orbitsSpec))
+    println(MyUniverse(orbitsSpec).countOrbits())
+    println(MyUniverse(orbitsSpec).countHopsFromYouToSanta())
 }
 
-
+// So I don't have to refactor the tests ...
 fun countOrbits(orbitsSpec: String): Int {
-    val allOrbits = mapOrbits(orbitsSpec)
-
-    val distinctSpaceObjects = (allOrbits.map { it.orbitedBy } + allOrbits.map { it.orbitedObject }).distinct()
-
-    return descendents(distinctSpaceObjects, allOrbits).count() - 1
+    return MyUniverse(orbitsSpec).countOrbits()
 }
 
-private fun mapOrbits(orbitsSpec: String): List<Orbit> {
-    return orbitsSpec
-        .split(",")
-        .map {
-            Orbit(
-                orbitedBy = SpaceObject(it.substringAfter(")")),
-                orbitedObject = SpaceObject(it.substringBefore(")"))
-            )
-        }
-}
-
-private fun findDirectOrbits(spaceObject: SpaceObject, allOrbits: List<Orbit>): List<SpaceObject> {
-    return allOrbits
-        .filter { it.orbitedBy == spaceObject }
-        .map { it.orbitedObject }
-}
-
-private fun findDirectParents(spaceObject: SpaceObject, allOrbits: List<Orbit>): List<SpaceObject> {
-    return allOrbits
-        .filter { it.orbitedObject == spaceObject }
-        .map { it.orbitedBy }
-}
-
-private fun descendents(spaceObjects: List<SpaceObject>, allOrbits: List<Orbit>): List<SpaceObject> {
-    val result = spaceObjects.flatMap { findDirectOrbits(it, allOrbits) }
-    return if (result.isEmpty()) spaceObjects
-    else result + descendents(result, allOrbits)
-
+fun transfersRequired(orbitsSpec: String): Int {
+    return MyUniverse(orbitsSpec).countHopsFromYouToSanta()
 }
 
 data class Orbit(val orbitedBy: SpaceObject, val orbitedObject: SpaceObject)
@@ -57,26 +27,46 @@ data class SpaceObject(val name: String) {
     }
 }
 
-fun transfersRequired(orbitsSpec: String): Int {
-    val allOrbits = mapOrbits(orbitsSpec)
+class MyUniverse(orbitsSpec: String) {
 
-    val santaIsOrbiting = allOrbits.first { it.orbitedBy == SANTA }.orbitedObject
+    private val allOrbits = mapOrbits(orbitsSpec)
 
-    return findTransfers(listOf(YOU), santaIsOrbiting, allOrbits)
-}
+    fun countHopsFromYouToSanta(): Int {
+        val santasDescendents = descendents(listOf(SANTA), allOrbits)
+        val yourDescendents = descendents(listOf(YOU), allOrbits)
 
-private fun findTransfers(
-    spaceObjects: List<SpaceObject>,
-    santaIsOrbiting: SpaceObject,
-    allOrbits: List<Orbit>,
-    transferCount: Int = 0
-): Int {
-    val orbits = spaceObjects.flatMap { findDirectOrbits(it, allOrbits) }
-    val orbitedBy = spaceObjects.flatMap { findDirectParents(it, allOrbits) }
+        val result = santasDescendents.intersect(yourDescendents).first()
 
-    return if (santaIsOrbiting in orbits || santaIsOrbiting in orbitedBy) {
-        transferCount
-    } else {
-        findTransfers(orbits + orbitedBy, santaIsOrbiting, allOrbits, transferCount + 1)
+        return santasDescendents.indexOf(result) + yourDescendents.indexOf(result)
+    }
+
+    fun countOrbits(): Int {
+        val distinctSpaceObjects = (allOrbits.map { it.orbitedBy } + allOrbits.map { it.orbitedObject }).distinct()
+
+        return descendents(distinctSpaceObjects, allOrbits).count() - 1
+    }
+
+    private fun directOrbit(spaceObject: SpaceObject): SpaceObject? {
+        return allOrbits
+            .firstOrNull { it.orbitedBy == spaceObject }
+            ?.orbitedObject
+    }
+
+    private fun descendents(spaceObjects: List<SpaceObject>, allOrbits: List<Orbit>): List<SpaceObject> {
+        val result = spaceObjects.mapNotNull { directOrbit(it) }
+        return if (result.isEmpty()) spaceObjects
+        else result + descendents(result, allOrbits)
+    }
+
+    private fun mapOrbits(orbitsSpec: String): List<Orbit> {
+        return orbitsSpec
+            .split(",")
+            .map {
+                Orbit(
+                    orbitedBy = SpaceObject(it.substringAfter(")")),
+                    orbitedObject = SpaceObject(it.substringBefore(")"))
+                )
+            }
     }
 }
+
