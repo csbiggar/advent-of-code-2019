@@ -2,16 +2,18 @@ package intcode
 
 import intcode.ParameterMode.IMMEDIATE
 import intcode.ParameterMode.POSITION
+import java.lang.RuntimeException
 
 class Program(initialInstructions: String) {
 
     private var instructions = initialInstructions.split(",").map { it.toInt() }.toMutableList()
     private var output: Int? = null
     private var pointer = 0
+    private var nextInputIndex = 0
 
     fun showMeTheInstructions() = instructions.joinToString(",")
 
-    fun run(input: Int? = null): Int? {
+    fun run(vararg input: Int): Int? {
 
         loop@ while (true) {
             val code = instructions[pointer].toString().padStart(5, '0')
@@ -30,7 +32,7 @@ class Program(initialInstructions: String) {
             when (operation) {
                 1 -> add(first, second, third)
                 2 -> multiply(first, second, third)
-                3 -> save(input, first)
+                3 -> save(input[nextInputIndex++], first)
                 4 -> output(first)
                 5 -> jumpIfTrue(first, second)
                 6 -> jumpIfFalse(first, second)

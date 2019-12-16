@@ -1,6 +1,7 @@
 package intcode
 
 import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 
 internal class ProgramTest {
@@ -198,4 +199,20 @@ internal class ProgramTest {
         Assertions.assertThat(Program(initialInstructions).run(8)).`as`("is 8").isEqualTo(1000)
         Assertions.assertThat(Program(initialInstructions).run(9)).`as`("greater than  8").isEqualTo(1001)
     }
+
+    @Test
+    fun `should handle multiple input parameters`() {
+        val program = Program("3,0,3,1,99")
+        program.run(42, 79)
+        Assertions.assertThat(program.showMeTheInstructions()).isEqualTo("42,79,3,1,99")
+    }
+
+    @Test
+    @Disabled
+    fun `should complain if not enough inputs`() {
+        //TODO Nice error handling for this:
+        val program = Program("3,0,3,1,99")
+        program.run(42)
+    }
+
 }
